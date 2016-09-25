@@ -6,7 +6,7 @@ defmodule Telxchat.TCP.Connection do
   @opts [:binary, packet: :line, active: false, reuseaddr: true, exit_on_close: true]
 
   def start_link do
-    GenServer.start_link(__MODULE__, 4000, [])
+    GenServer.start_link(__MODULE__, 4000, [name: :tcp_connection])
   end
 
   def init(port) do

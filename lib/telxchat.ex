@@ -5,7 +5,8 @@ defmodule Telxchat do
     import Supervisor.Spec, warn: false
 
     children = [
-      supervisor(Telxchat.TCP.Supervisor, [])
+      supervisor(Telxchat.TCP.Supervisor, []),
+      supervisor(Telxchat.Handler.Supervisor, [])
     ] 
   
     Supervisor.start_link(children, [name: __MODULE__, strategy: :one_for_one])
