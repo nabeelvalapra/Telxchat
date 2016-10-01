@@ -13,6 +13,7 @@ defmodule Telxchat.TCP.Connection do
     {:ok, socket} = :gen_tcp.listen(port, @opts)
     Logger.info "Listening to #{port} !!!"
     Task.start_link(fn -> listen_for_conn(socket) end)
+    {:ok, []}
   end
 
   def listen_for_conn(socket) do
@@ -24,7 +25,8 @@ defmodule Telxchat.TCP.Connection do
   end
 
   def worker_name(conn) do
-    {:ok, {{a, b, c, d}, _}} = :inet.peername(conn)
-    :"#{a}.#{b}.#{c}.#{d}"
+    String.to_atom(Faker.Name.first_name)
+    # {:ok, {{a, b, c, d}, _}} = :inet.peername(conn)
+    # :"#{a}.#{b}.#{c}.#{d}"
   end
 end
