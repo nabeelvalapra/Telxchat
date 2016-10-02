@@ -7,6 +7,8 @@ defmodule Telxchat.Handler.Command do
   end
 
   def init([conn, name]) do
+    msg = "Your name is registered as #{name} \n"
+    :gen_tcp.send(conn, msg)
     spawn_link(__MODULE__, :echo_worker, [conn, name])
     {:ok, conn}
   end
@@ -14,12 +16,9 @@ defmodule Telxchat.Handler.Command do
   def echo_worker(conn, name) do
     case :gen_tcp.recv(conn, 0) do
       {:ok, data} ->
-        Logger.info "#{name}: #{data}"
         :gen_tcp.send(conn, data)
-        init([conn, name])
-
+        echo_worker(conn, name)
       {:error, :closed} -> :ok
     end
-
   end
 end
