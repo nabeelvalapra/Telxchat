@@ -6,6 +6,10 @@ defmodule Telxchat.Handler.Command do
     GenServer.start_link(__MODULE__, [conn, name], [name: name])
   end
 
+  def put_msg(pid, message) do
+    GenServer.cast(pid, {:put, message})
+  end
+
   def init([conn, name]) do
     msg = "Your name is registered as #{name} \n"
     :gen_tcp.send(conn, msg)
@@ -20,5 +24,10 @@ defmodule Telxchat.Handler.Command do
         echo_worker(conn, name)
       {:error, :closed} -> :ok
     end
+  end
+
+  def handle_cast({:put, message}, state) do
+    Logger.info message
+    {:noreply, []}
   end
 end
