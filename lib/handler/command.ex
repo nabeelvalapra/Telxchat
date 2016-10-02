@@ -26,8 +26,8 @@ defmodule Telxchat.Handler.Command do
     end
   end
 
-  def handle_cast({:put, message}, state) do
-    Logger.info message
-    {:noreply, []}
+  def handle_cast({:put, message}, conn) do
+    :gen_tcp.send(conn, message)
+    {:noreply, conn}
   end
 end
