@@ -13,15 +13,19 @@ defmodule Telxchat.Handler.Command do
   def init([conn, name]) do
     msg = "Your name is registered as #{name} \n"
     :gen_tcp.send(conn, msg)
-    spawn_link(__MODULE__, :echo_worker, [conn, name])
+    spawn_link(__MODULE__, :send_worker, [conn, name])
     {:ok, conn}
   end
 
-  def echo_worker(conn, name) do
+  def send_worker(conn, name) do
     case :gen_tcp.recv(conn, 0) do
       {:ok, data} ->
-        :gen_tcp.send(conn, data)
-        echo_worker(conn, name)
+        [recip, msg] = String.trim_leading(data, "/")
+                        |> String.split(" ") 
+        recip = String.to_atom(recip)
+        recip_pid = GenServer.whereis(recip)
+        put_msg(recip_pid, msg)
+        send_worker(conn, name)
       {:error, :closed} -> :ok
     end
   end
