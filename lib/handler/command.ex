@@ -1,6 +1,7 @@
 defmodule Telxchat.Handler.Command do
   use GenServer
   require Logger
+  alias Telxchat.Handler.Processor
 
   def start_link(conn, name) do
     GenServer.start_link(__MODULE__, [conn, name], [name: name])
@@ -20,13 +21,17 @@ defmodule Telxchat.Handler.Command do
   def send_worker(conn, name) do
     case :gen_tcp.recv(conn, 0) do
       {:ok, data} ->
-        [recip, msg] = String.trim_leading(data, "/")
-                        |> String.split(" ") 
-        recip = String.to_atom(recip)
-        recip_pid = GenServer.whereis(recip)
-        put_msg(recip_pid, msg)
+        case Processor.process(data) do
+          {:no_data, message} ->
+            nil
+          {:invalid_pid, message} ->
+            put_msg(name, "There is no such user")
+          {recip_pid, message} -> 
+            put_msg(recip_pid, message)
+        end
         send_worker(conn, name)
-      {:error, :closed} -> :ok
+      {:error, :closed} ->
+        :ok
     end
   end
 
