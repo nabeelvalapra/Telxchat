@@ -21,17 +21,11 @@ defmodule Telxchat.Handler.Command do
   def send_worker(conn, name) do
     case :gen_tcp.recv(conn, 0) do
       {:ok, data} ->
-        case Processor.process(data) do
-          {:no_data, message} ->
-            nil
-          {:invalid_pid, message} ->
-            put_msg(name, "There is no such user")
-          {recip_pid, message} -> 
-            put_msg(recip_pid, message)
-        end
+        {pid, msg} = Processor.process(data, Atom.to_string(name))
+        put_msg(pid, msg)
         send_worker(conn, name)
       {:error, :closed} ->
-        :ok
+        :error
     end
   end
 
